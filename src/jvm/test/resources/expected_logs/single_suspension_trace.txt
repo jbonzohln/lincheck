@@ -1,0 +1,71 @@
+= Invalid execution results =
+| ---------------------------------------------------- |
+|              Thread 1               |    Thread 2    |
+| ---------------------------------------------------- |
+| trigger(): IllegalStateException #1 | operation(): 0 |
+| ---------------------------------------------------- |
+
+---
+The number next to an exception name helps you find its stack trace provided after the interleaving section
+---
+
+The following interleaving leads to the error:
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                           Thread 1                                                            |                                                          Thread 2                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| trigger(): IllegalStateException #1                                                                                           |                                                                                                                            |
+|   nestedTrigger(): threw IllegalStateException at SingleSuspensionTraceReportingTest.trigger(MultipleSuspensionsTests.kt:106) |                                                                                                                            |
+|     counter.READ: AtomicInteger#1 at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:110)        |                                                                                                                            |
+|     AtomicInteger#1.set(1) at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:110)               |                                                                                                                            |
+|     switch                                                                                                                    |                                                                                                                            |
+|                                                                                                                               | operation(): 0                                                                                                             |
+|                                                                                                                               |   method(): COROUTINE_SUSPENDED at SingleSuspensionTraceReportingTest.operation(MultipleSuspensionsTests.kt:117)           |
+|                                                                                                                               |     counter.READ: AtomicInteger#1 at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:122)            |
+|                                                                                                                               |     AtomicInteger#1.get(): 1 at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:122)                 |
+|                                                                                                                               |     continuation1.WRITE(<cont>) at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:125)              |
+|                                                                                                                               |     <cont>.getOrThrow(): COROUTINE_SUSPENDED at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:125) |
+|                                                                                                                               |       result.READ: UNDECIDED at SafeContinuation.getOrThrow(SafeContinuationJvm.kt:51)                                     |
+|                                                                                                                               |       result.compareAndSet(UNDECIDED,COROUTINE_SUSPENDED): true at SafeContinuation.getOrThrow(SafeContinuationJvm.kt:53)  |
+|                                                                                                                               |       switch (reason: coroutine is suspended)                                                                              |
+|     continuation1.READ: <cont> at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:111)           |                                                                                                                            |
+|     <cont>.resumeWith(Unit#1) at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:111)            |                                                                                                                            |
+|     switch                                                                                                                    |                                                                                                                            |
+|                                                                                                                               |     fail.WRITE(true) at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:127)                         |
+|                                                                                                                               |   result: 0                                                                                                                |
+|     fail.READ: true at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:112)                      |                                                                                                                            |
+|   result: IllegalStateException #1                                                                                            |                                                                                                                            |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+
+Exception stack traces:
+#1: java.lang.IllegalStateException: Check failed.
+	at org.jetbrains.kotlinx.lincheck_test.representation.SingleSuspensionTraceReportingTest.nestedTrigger(Unknown Source)
+	at org.jetbrains.kotlinx.lincheck_test.representation.SingleSuspensionTraceReportingTest.trigger(Unknown Source)
+
+Detailed trace:
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                           Thread 1                                                            |                                                          Thread 2                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| trigger(): IllegalStateException #1                                                                                           |                                                                                                                            |
+|   nestedTrigger(): threw IllegalStateException at SingleSuspensionTraceReportingTest.trigger(MultipleSuspensionsTests.kt:106) |                                                                                                                            |
+|     counter.READ: AtomicInteger#1 at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:110)        |                                                                                                                            |
+|     AtomicInteger#1.set(1) at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:110)               |                                                                                                                            |
+|     switch                                                                                                                    |                                                                                                                            |
+|                                                                                                                               | operation(): 0                                                                                                             |
+|                                                                                                                               |   method(): COROUTINE_SUSPENDED at SingleSuspensionTraceReportingTest.operation(MultipleSuspensionsTests.kt:117)           |
+|                                                                                                                               |     counter.READ: AtomicInteger#1 at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:122)            |
+|                                                                                                                               |     AtomicInteger#1.get(): 1 at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:122)                 |
+|                                                                                                                               |     continuation1.WRITE(<cont>) at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:125)              |
+|                                                                                                                               |     <cont>.getOrThrow(): COROUTINE_SUSPENDED at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:125) |
+|                                                                                                                               |       result.READ: UNDECIDED at SafeContinuation.getOrThrow(SafeContinuationJvm.kt:51)                                     |
+|                                                                                                                               |       result.compareAndSet(UNDECIDED,COROUTINE_SUSPENDED): true at SafeContinuation.getOrThrow(SafeContinuationJvm.kt:53)  |
+|                                                                                                                               |       switch (reason: coroutine is suspended)                                                                              |
+|     continuation1.READ: <cont> at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:111)           |                                                                                                                            |
+|     <cont>.resumeWith(Unit#1) at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:111)            |                                                                                                                            |
+|       result.READ: COROUTINE_SUSPENDED at SafeContinuation.resumeWith(SafeContinuationJvm.kt:37)                              |                                                                                                                            |
+|       result.compareAndSet(COROUTINE_SUSPENDED,RESUMED): true at SafeContinuation.resumeWith(SafeContinuationJvm.kt:40)       |                                                                                                                            |
+|     switch                                                                                                                    |                                                                                                                            |
+|                                                                                                                               |     fail.WRITE(true) at SingleSuspensionTraceReportingTest.method(MultipleSuspensionsTests.kt:127)                         |
+|                                                                                                                               |   result: 0                                                                                                                |
+|     fail.READ: true at SingleSuspensionTraceReportingTest.nestedTrigger(MultipleSuspensionsTests.kt:112)                      |                                                                                                                            |
+|   result: IllegalStateException #1                                                                                            |                                                                                                                            |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
