@@ -126,7 +126,7 @@ abstract class ManagedStrategy(
     private var eventIdProvider = EventIdProvider()
 
     /**
-     * In current implementation we don't track the invocation of actor itself and the exit of it.
+     * In current implementation we don't track the invocation of actor itself.
      * But when the actor represents `suspend` function, and it is suspended - it will be resumed
      * manually by [ParallelThreadsRunner] using `Continuation::resumeWith`. Then, the execution will enter
      * the similar method representing this actor, but which receives a continuation also
