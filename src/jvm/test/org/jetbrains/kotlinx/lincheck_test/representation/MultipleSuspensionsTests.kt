@@ -102,23 +102,24 @@ class SingleSuspensionTraceReportingTest {
     private var fail: Boolean = false
 
     @Operation
-    fun trigger() {
-        nestedTrigger()
+    fun triggerAndCheck(): Boolean {
+        return continueAndCheckIfFailed()
     }
 
-    private fun nestedTrigger() {
+    private fun continueAndCheckIfFailed(): Boolean {
         counter.set(1)
         continuation1?.resume(Unit)
-        check(!fail)
+        return fail
     }
 
     @Operation
     suspend fun operation(): Int {
-        return method()
+        // Nested method to check proper trace reporting
+        return suspendAndCauseFailure()
     }
 
     @Suppress("SameReturnValue")
-    private suspend fun method(): Int {
+    private suspend fun suspendAndCauseFailure(): Int {
         if (counter.get() == 1) {
             @Suppress("RemoveExplicitTypeArguments")
             // Doesn't compile without explicit typing for now
@@ -132,7 +133,7 @@ class SingleSuspensionTraceReportingTest {
     fun test() = ModelCheckingOptions()
         .addCustomScenario {
             parallel {
-                thread { actor(::trigger) }
+                thread { actor(::triggerAndCheck) }
                 thread { actor(::operation) }
             }
         }
