@@ -140,6 +140,20 @@ abstract class ManagedStrategy(
     private val nextMethodCallInThreadIsResumedActorCall = BooleanArray(nThreads) { false }
 
     /**
+     * In case when the plugin is enabled, we enable [eventIdStrictOrderingCheck] property and
+     * check that ids provided to the [beforeEvent] method and corresponding trace points are sequentially ordered.
+     * But as described above in doc to [nextMethodCallInThreadIsResumedActorCall] field, we don't add a
+     * [MethodCallTracePoint] for the resumed actor invocation.
+     * In current implementation `nextMethodCallInThreadIsResumedActorCall[iThread]` will be set to false right before
+     * the next [EventIdProvider.nextId] will be invoked, because [beforeMethodCall] method call goes before the [beforeEvent]
+     * method call. So this field just tracks if the [nextMethodCallInThreadIsResumedActorCall] by the current thread
+     * was just set from `true` to `false` to help us to skip next [beforeEvent] method call.
+     *
+     * @see nextMethodCallInThreadIsResumedActorCall
+     */
+    private var skipNextBeforeEvent = false
+
+    /**
      * Current method call context (static or instance).
      * Initialized and used only in the trace collecting stage.
      */
@@ -189,6 +203,7 @@ abstract class ManagedStrategy(
         finished.fill(false)
         isSuspended.fill(false)
         nextMethodCallInThreadIsResumedActorCall.fill(false)
+        skipNextBeforeEvent = false
         currentActorId.fill(-1)
         monitorTracker = MonitorTracker(nThreads)
         traceCollector = if (collectTrace) TraceCollector() else null
@@ -915,8 +930,10 @@ abstract class ManagedStrategy(
                 // See description if the `nextMethodCallInThreadIsResumedActorCall` field for details
                 if (!nextMethodCallInThreadIsResumedActorCall[currentThread]) {
                     addBeforeMethodCallTracePoint(owner, codeLocation, methodId, className, methodName, params, atomicMethodDescriptor)
+                    skipNextBeforeEvent = false
                 } else {
                     nextMethodCallInThreadIsResumedActorCall[currentThread] = false
+                    skipNextBeforeEvent = true
                 }
             }
             if (guarantee == ManagedGuaranteeType.TREAT_AS_ATOMIC) {
@@ -1475,7 +1492,19 @@ abstract class ManagedStrategy(
         }
     }
 
-
+    /**
+     * Make sense only of the plugin is enabled.
+     * Indicates if the next [beforeEvent] method call should be ignored.
+     *
+     * @see skipNextBeforeEvent
+     */
+    protected fun shouldSkipBeforeEvent(): Boolean {
+        val skipBeforeEvent = skipNextBeforeEvent
+        if (skipNextBeforeEvent) {
+            skipNextBeforeEvent = false
+        }
+        return skipBeforeEvent
+    }
 
     /**
      * Utility class to set trace point ids for the Lincheck Plugin.
