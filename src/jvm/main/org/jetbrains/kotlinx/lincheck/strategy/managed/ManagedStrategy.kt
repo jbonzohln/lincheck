@@ -1503,6 +1503,7 @@ abstract class ManagedStrategy(
         if (skipNextBeforeEvent) {
             skipNextBeforeEvent = false
         }
+
         return skipBeforeEvent
     }
 
