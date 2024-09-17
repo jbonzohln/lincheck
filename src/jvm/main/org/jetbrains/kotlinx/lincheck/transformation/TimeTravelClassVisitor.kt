@@ -31,7 +31,7 @@ class TimeTravelClassVisitor(
         interfaces: Array<String>
     ) {
         super.visit(version, access, name, signature, superName, interfaces)
-        println("Class name under observation: $name")
+//        println("Class name under observation: $name")
         className = name
     }
 
@@ -43,7 +43,7 @@ class TimeTravelClassVisitor(
         exceptions: Array<String>?
     ): MethodVisitor {
         fun MethodVisitor.newAdapter() = GeneratorAdapter(this, access, methodName, desc)
-        println("Visiting method: $className::$methodName(...)")
+//        println("Visiting method: $className::$methodName(...)")
 
         var mv = super.visitMethod(access, methodName, desc, signature, exceptions)
         if (className == classUnderTimeTravel && methodName == methodUnderTimeTravel) {
