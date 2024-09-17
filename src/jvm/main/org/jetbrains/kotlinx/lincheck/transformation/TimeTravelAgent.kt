@@ -53,7 +53,7 @@ internal class TimeTravelTransformer(private val classUnderTimeTravel: String,
         internalClassName: String,
         classBytes: ByteArray
     ): ByteArray {
-//        println("Transforming class $internalClassName")
+        println("Transforming class $internalClassName")
 
         try {
             val bytes: ByteArray
