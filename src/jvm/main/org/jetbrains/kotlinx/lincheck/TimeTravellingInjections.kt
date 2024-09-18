@@ -16,11 +16,22 @@ import org.jetbrains.kotlinx.lincheck.strategy.managed.modelchecking.*
 import org.jetbrains.kotlinx.lincheck.verifier.*
 
 object TimeTravellingInjections {
-    val classUnderTimeTravel: String? = System.getProperty("rr.className")
-    val methodUnderTimeTravel: String? = System.getProperty("rr.methodName")
+    lateinit var classUnderTimeTravel: String
+    lateinit var methodUnderTimeTravel: String
 
     @JvmStatic
     var firstRun = true
+
+    @JvmStatic
+    fun parseArgs(args: String?) {
+        if (args == null) {
+            error("Please provide class and method names as arguments")
+        }
+
+        val (classNameArg, methodNameArg) = args.split(",")
+        classUnderTimeTravel = classNameArg
+        methodUnderTimeTravel = methodNameArg
+    }
 
     @JvmStatic
     fun runWithLincheck(testClassName: String, testMethodName: String) {

@@ -26,9 +26,7 @@ object TimeTravelAgent {
     fun premain(agentArgs: String?, inst: Instrumentation) {
         // install agent
         println("Installing Time Travelling Agent")
-        if (TimeTravellingInjections.classUnderTimeTravel == null) error("Class name under time travel not found")
-        if (TimeTravellingInjections.methodUnderTimeTravel == null) error("Method name under time travel not found")
-
+        TimeTravellingInjections.parseArgs(agentArgs)
         inst.addTransformer(TimeTravelTransformer, true)
     }
 }
@@ -56,8 +54,8 @@ internal object TimeTravelTransformer : ClassFileTransformer {
         classBytes: ByteArray
     ): ByteArray {
         //println("Transforming class $internalClassName")
-        val classUnderTimeTravel = TimeTravellingInjections.classUnderTimeTravel!!
-        val methodUnderTimeTravel = TimeTravellingInjections.methodUnderTimeTravel!!
+        val classUnderTimeTravel = TimeTravellingInjections.classUnderTimeTravel
+        val methodUnderTimeTravel = TimeTravellingInjections.methodUnderTimeTravel
 
         try {
             val bytes: ByteArray
