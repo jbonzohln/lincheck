@@ -445,7 +445,7 @@ abstract class ManagedStrategy(
         val forkedThreadId = registerThread(thread, descriptor)
     }
 
-    override fun afterThreadFork(thread: Thread?) {
+    override fun afterThreadFork(thread: Thread?) = runInIgnoredSection {
         val currentThreadId = threadScheduler.getCurrentThreadId()
         // do not track threads forked from unregistered threads
         if (currentThreadId < 0) return
